@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ContentKeeper Reachability Check</title>
+  <style>
+    :root { --ok:#1a7f37; --bad:#b42318; --warn:#b54708; --muted:#667085; }
+    body { font-family: system-ui, Segoe UI, Arial, sans-serif; margin: 20px; color:#111827; }
+    h1 { font-size: 20px; margin: 0 0 6px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    button { padding: 10px 14px; border: 0; border-radius: 8px; background: #2563eb; color:#fff; cursor:pointer; }
+    button:disabled { opacity: .6; cursor:not-allowed; }
+    .grid { display: grid; gap: 12px; margin-top: 14px; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+    .row { display:flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .badge { padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+    .ok { background: rgba(26,127,55,.12); color: var(--ok); }
+    .bad { background: rgba(180,35,24,.12); color: var(--bad); }
+    .warn { background: rgba(181,71,8,.12); color: var(--warn); }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { border-top: 1px solid #e5e7eb; padding: 8px 6px; vertical-align: top; }
+    th { text-align: left; color:#374151; font-weight: 600; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+    .small { font-size: 12px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .right { text-align: right; }
+    .details { margin-top: 8px; }
+    .details summary { cursor: pointer; color:#2563eb; }
+    .footer { margin-top: 12px; font-size: 12px; color: var(--muted); }
+    .kvs { display:grid; grid-template-columns: 140px 1fr; gap: 6px 10px; margin-top: 8px; font-size: 13px; }
+    .kvs div:nth-child(odd){ color:#374151; }
+  </style>
+</head>
+<body>
+  <h1>ContentKeeper Reachability Check</h1>
+  <div class="muted">
+    Tests DNS via DNS-over-HTTPS and attempts to reach each endpoint from your browser.
+    Note: because of CORS, the page cannot read HTTP status codes; it can only tell whether the request was blocked/failed at the network layer.
+  </div>
+
+  <div class="row" style="margin-top:12px;">
+    <button id="runBtn">Run checks</button>
+    <div class="muted small">Timeout: <code>4s</code> per request</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="row">
+        <div><strong>Overall</strong></div>
+        <div id="overallBadge" class="badge warn">Not run</div>
+      </div>
+      <div class="kvs">
+        <div>Page loaded via</div><div id="pageScheme" class="mono"></div>
+        <div>User agent</div><div id="ua" class="mono"></div>
+        <div>Timestamp</div><div id="ts" class="mono"></div>
+      </div>
+      <div class="footer">
+        If <strong>HTTP</strong> endpoint tests show “blocked by mixed content”, host this page over <strong>HTTP</strong> as well (or switch the endpoint to HTTPS if available).
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div><strong>Results</strong></div>
+        <div class="muted small">DNS provider: <code>dns.google</code></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Endpoint</th>
+            <th>DNS (A/AAAA)</th>
+            <th>Reachability</th>
+            <th class="right">Time</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+
+      <details class="details">
+        <summary>Show raw output</summary>
+        <pre id="raw" class="mono small"></pre>
+      </details>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const TIMEOUT_MS = 4000;
+
+  // Endpoints to test
+  const targets = [
+    {
+      name: "chub1.imp.us.contentkeeper.net",
+      urls: ["https://chub1.imp.us.contentkeeper.net/"],
+      expectedA: ["38.65.81.29"],        // edit as needed
+      expectedAAAA: []
+    },
+    {
+      name: "chub2.imp.us.contentkeeper.net",
+      urls: ["https://chub2.imp.us.contentkeeper.net/"],
+      expectedA: ["38.65.81.197"],       // edit as needed
+      expectedAAAA: []
+    },
+    {
+      name: "e.659998.ep.contentkeeper.net",
+      // Try https first; if it doesn't support https, it will fail and then we try http.
+      urls: ["https://e.659998.ep.contentkeeper.net/", "http://e.659998.ep.contentkeeper.net/"],
+      // IP may vary; include all "known good" candidates if you have them.
+      expectedA: ["38.96.252.19", "38.86.210.18"],
+      expectedAAAA: []
+    }
+  ];
+
+  const el = (id) => document.getElementById(id);
+
+  el("pageScheme").textContent = location.protocol;
+  el("ua").textContent = navigator.userAgent;
+
+  function badge(text, kind) {
+    const cls = kind === "ok" ? "badge ok" : kind === "bad" ? "badge bad" : "badge warn";
+    return `<span class="${cls}">${text}</span>`;
+  }
+
+  function fmtMs(ms) {
+    if (ms == null) return "";
+    return `${Math.round(ms)}ms`;
+  }
+
+  // DNS-over-HTTPS: Google JSON API (CORS-friendly)
+  async function dohResolve(name, type) {
+    const url = `https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal });
+      const json = await res.json();
+      const answers = (json.Answer || [])
+        .filter(a => a && a.data)
+        .map(a => a.data);
+      return { ok: true, answers };
+    } catch (e) {
+      return { ok: false, error: String(e && e.message ? e.message : e) };
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  function compareExpected(actual, expectedList) {
+    if (!expectedList || expectedList.length === 0) return { state: "warn", msg: "No expected list" };
+    if (!actual || actual.length === 0) return { state: "bad", msg: "No records" };
+
+    const actualSet = new Set(actual);
+    const expectedSet = new Set(expectedList);
+    const overlap = [...actualSet].some(x => expectedSet.has(x));
+
+    if (overlap) {
+      // If you want strict matching (all returned IPs must be in expected), change logic here.
+      return { state: "ok", msg: "Matches expected (at least one)" };
+    }
+    return { state: "warn", msg: "Does not match expected list" };
+  }
+
+  // Reachability test:
+  // - For HTTPS endpoints: fetch(no-cors) succeeds => request reached remote (opaque response). Reject => blocked by network/DNS/TLS.
+  // - For HTTP endpoints: may be blocked by mixed-content when page is HTTPS.
+  async function reachability(url) {
+    const start = performance.now();
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+
+    try {
+      // no-cors -> opaque response; we only care if network succeeded vs failed
+      await fetch(url, { mode: "no-cors", cache: "no-store", signal: ctrl.signal });
+      return { ok: true, ms: performance.now() - start, note: "Request sent (opaque)" };
+    } catch (e) {
+      const msg = String(e && e.message ? e.message : e);
+
+      // Heuristic for mixed content: browsers often say "Failed to fetch" only.
+      // We can still detect by scheme mismatch.
+      if (location.protocol === "https:" && url.startsWith("http://")) {
+        return { ok: false, ms: performance.now() - start, note: "Likely blocked by mixed content (HTTP from HTTPS page)" };
+      }
+      if (msg.toLowerCase().includes("aborted")) {
+        return { ok: false, ms: performance.now() - start, note: `Timeout after ${TIMEOUT_MS}ms` };
+      }
+      return { ok: false, ms: performance.now() - start, note: "Network/TLS/DNS blocked (fetch failed)" };
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  async function run() {
+    el("runBtn").disabled = true;
+    el("ts").textContent = new Date().toISOString();
+    el("resultsBody").innerHTML = "";
+    el("raw").textContent = "";
+
+    const rawOut = [];
+    let overallOk = true;
+    let anyWarn = false;
+
+    for (const t of targets) {
+      const a = await dohResolve(t.name, "A");
+      const aaaa = await dohResolve(t.name, "AAAA");
+
+      const aList = a.ok ? a.answers : [];
+      const aaaaList = aaaa.ok ? aaaa.answers : [];
+
+      const aCmp = compareExpected(aList, t.expectedA);
+      const aaaaCmp = compareExpected(aaaaList, t.expectedAAAA);
+
+      // Consider DNS "ok" if A resolves (AAAA optional)
+      const dnsOk = a.ok && aList.length > 0;
+      if (!dnsOk) overallOk = false;
+      if (aCmp.state === "warn" || aaaaCmp.state === "warn") anyWarn = true;
+
+      // Reachability: try URLs in order until one works, but keep notes.
+      const reachAttempts = [];
+      let reachOk = false;
+      let reachMs = null;
+      let reachNote = "";
+
+      for (const url of t.urls) {
+        const r = await reachability(url);
+        reachAttempts.push({ url, ...r });
+        if (r.ok) {
+          reachOk = true;
+          reachMs = r.ms;
+          reachNote = `${url} (${r.note})`;
+          break;
+        }
+      }
+      if (!reachOk) {
+        overallOk = false;
+        reachMs = reachAttempts.length ? reachAttempts[reachAttempts.length - 1].ms : null;
+        reachNote = reachAttempts.map(x => `${x.url} → ${x.note}`).join(" | ");
+      }
+
+      const dnsBadge = dnsOk
+        ? badge(`✓ A: ${aList.join(", ") || "-"}`, aCmp.state)
+        : badge(`✗ DNS failed`, "bad");
+
+      const reachBadge = reachOk
+        ? badge("✓ Reachable", "ok")
+        : badge("✗ Not reachable", "bad");
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><div class="mono">${t.name}</div><div class="muted small">${t.urls.map(u => `<div>${u}</div>`).join("")}</div></td>
+        <td>
+          <div>${dnsBadge}</div>
+          <div class="muted small mono" style="margin-top:4px;">
+            A expected: ${t.expectedA.length ? t.expectedA.join(", ") : "(none)"}<br/>
+            AAAA: ${aaaaList.join(", ") || "(none)"}
+          </div>
+        </td>
+        <td>
+          <div>${reachBadge}</div>
+          <div class="muted small">${escapeHtml(reachNote)}</div>
+        </td>
+        <td class="right mono">${fmtMs(reachMs)}</td>
+      `;
+      el("resultsBody").appendChild(row);
+
+      rawOut.push({
+        host: t.name,
+        dns: { A: a, AAAA: aaaa, expectedA: t.expectedA, expectedAAAA: t.expectedAAAA, compareA: aCmp, compareAAAA: aaaaCmp },
+        reachability: reachAttempts
+      });
+    }
+
+    const overallEl = el("overallBadge");
+    if (overallOk && !anyWarn) {
+      overallEl.className = "badge ok";
+      overallEl.textContent = "OK";
+    } else if (overallOk && anyWarn) {
+      overallEl.className = "badge warn";
+      overallEl.textContent = "OK (DNS mismatch warning)";
+    } else {
+      overallEl.className = "badge bad";
+      overallEl.textContent = "Issues detected";
+    }
+
+    el("raw").textContent = JSON.stringify(rawOut, null, 2);
+    el("runBtn").disabled = false;
+  }
+
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  el("runBtn").addEventListener("click", run);
+})();
+</script>
+</body>
+</html>
