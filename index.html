@@ -23,7 +23,7 @@
     .small { font-size: 12px; }
   </style>
 </head>
-<body style="text-align: center;">
+<body><div style="display:flex; justify-content: space-around;">
   <h1>ContentKeeper Quick Check</h1>
   <div class="muted">
     Test to see if your internet connection is impacted by the routing issues we're experiencing with ContentKeeper (CKExpress)
@@ -67,7 +67,7 @@
       </tbody>
     </table>
   </div>
-  <div style="display:flex; text-align: center; margin-top:20px">
+  <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
 <script>
@@ -161,5 +161,6 @@
   el("runBtn").addEventListener("click", run);
 })();
 </script>
+</div>
 </body>
 </html>
