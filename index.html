@@ -118,7 +118,7 @@
       if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", region: "-"};
       const data = await ispRes.res.json();
       console.log("Data: ", data);
-      return { ok: true, ip: data.ip, isp: data.connection.org, asn: data.connection.asn, city: data.city, region: data.region};
+      return { ok: true, ip: data.ip, isp: data.company.name, asn: data.asn.asn, city: data.city, region: data.region};
     } catch {
       return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: "" };
     }
