@@ -26,18 +26,16 @@
 <body>
   <h1>ContentKeeper Quick Check</h1>
   <div class="muted">
-    Pass/fail reachability test for the two HTTPS endpoints, plus your public IP as seen by an external service.
-    Note: due to browser security (CORS), we can’t reliably read HTTP status codes from the endpoints; this checks whether the browser can reach them at all.
+    Test to see if your internet connection is impacted by the routing issues we're experiencing with ContentKeeper (CKExpress)
   </div>
 
   <div class="row" style="margin-top:12px;">
     <button id="runBtn">Run check</button>
-    <div class="muted small">Timeout: <span class="mono">4s</span> per check</div>
   </div>
 
   <div class="card">
     <div class="row">
-      <div><strong>Overall</strong></div>
+      <div><strong>Test Details</strong></div>
       <div id="overall" class="badge bad">Not run</div>
     </div>
 
@@ -48,28 +46,26 @@
           <td class="mono" id="ts">-</td>
         </tr>
         <tr>
-          <th>Public IP</th>
+          <th>Public IP Address</th>
           <td class="mono" id="publicIp">Checking…</td>
         </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <div><strong>Endpoints</strong></div>
-      <div class="muted small">Test method: <span class="mono">fetch(no-cors)</span></div>
-    </div>
-
-    <table>
-      <thead>
         <tr>
-          <th>URL</th>
-          <th style="width:120px;">Result</th>
-          <th style="width:90px;">Time</th>
+          <th>Internet Service Provider</th>
+          <td class="mono" id="isp">Checking…</td>
         </tr>
-      </thead>
-      <tbody id="rows"></tbody>
+        <tr>
+          <th>ASN</th>
+          <td class="mono" id="asn">Checking…</td>
+        </tr>
+        <tr>
+          <th>Region</th>
+          <td class="mono" id="region">Checking…</td>
+        </tr>
+        <tr>
+          <th>City</th>
+          <td class="mono" id="city">Checking…</td>
+        </tr>
+      </tbody>
     </table>
   </div>
 
@@ -114,39 +110,43 @@
   async function getPublicIp() {
     // Not “seen by YOUR web server” (static sites can’t see headers), but a reliable external view of public IP.
     // If you later add a tiny backend, swap this to your endpoint and return the connecting IP.
-    const r = await withTimeout((signal) => fetch("https://api.ipify.org?format=json", { signal, cache: "no-store" }));
-    if (!r.ok) return { ok: false, value: "-" };
+    const ipRes = await withTimeout((signal) => fetch("https://api.ipify.org?format=json", { signal, cache: "no-store" }));
+    if (!ipRes.ok) return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: ""};
     try {
-      const j = await r.res.json();
-      return { ok: true, value: j.ip || "-" };
+      const ip = await ipRes.json();
+      const ipRes = await withTimeout((signal) => fetch(`https://ipapi.co/${ip}/json`, { signal, cache: "no-store" }));
+      if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", region: ""};
+      const data = await ispRes.json();
+      return { ok: false, ip: data.ip || "", isp: data.org || "", asn: data.asn || "", city: data.city || "", region: data.region || ""};
     } catch {
-      return { ok: false, value: "-" };
+      return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: "" };
     }
   }
 
   async function run() {
     el("runBtn").disabled = true;
-    el("ts").textContent = new Date().toISOString();
+    el("ts").textContent = new Date().toString();
     el("rows").innerHTML = "";
 
     // Public IP
     el("publicIp").textContent = "Checking…";
-    const ip = await getPublicIp();
-    el("publicIp").textContent = ip.ok ? ip.value : "Unavailable";
+    el("isp").textContent = "Checking...";
+    el("asn").textContent = "Checking...";
+    el("region").textContent = "Checking...";
+    el("city").textContent = "Checking...";
+    const ipData = await getPublicIp();
+    el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
+    el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
+    el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
+    el("region").textContent = ipData.ok ? ipData.region : "Unavailable";
+    el("city").textContent = ipData.ok ? ipData.city : "Unavailable";
+
 
     // Endpoint checks
     const results = [];
     for (const url of targets) {
       const r = await testEndpoint(url);
       results.push({ url, ...r });
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="mono">${url}</td>
-        <td>${r.ok ? '<span class="badge ok">PASS</span>' : '<span class="badge bad">FAIL</span>'}</td>
-        <td class="mono">${Math.round(r.ms)}ms</td>
-      `;
-      el("rows").appendChild(tr);
     }
 
     const allOk = results.every(r => r.ok);
@@ -160,8 +160,16 @@
   // Populate IP on load (non-blocking)
   (async () => {
     el("publicIp").textContent = "Checking…";
-    const ip = await getPublicIp();
-    el("publicIp").textContent = ip.ok ? ip.value : "Unavailable";
+    el("isp").textContent = "Checking...";
+    el("asn").textContent = "Checking...";
+    el("region").textContent = "Checking...";
+    el("city").textContent = "Checking...";
+    const ipData = await getPublicIp();
+    el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
+    el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
+    el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
+    el("region").textContent = ipData.ok ? ipData.region : "Unavailable";
+    el("city").textContent = ipData.ok ? ipData.city : "Unavailable";
   })();
 })();
 </script>
