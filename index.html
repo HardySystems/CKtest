@@ -122,7 +122,8 @@
   async function run() {
     el("runBtn").disabled = true;
     el("ts").textContent = new Date().toString();
-
+    el("message").textContent = "";
+    setBadge(el(overall), true, "-");
 
     // Public IP
     el("publicIp").textContent = "Checking…";
