@@ -156,21 +156,6 @@
   }
 
   el("runBtn").addEventListener("click", run);
-
-  // Populate IP on load (non-blocking)
-  (async () => {
-    el("publicIp").textContent = "Checking…";
-    el("isp").textContent = "Checking...";
-    el("asn").textContent = "Checking...";
-    el("region").textContent = "Checking...";
-    el("city").textContent = "Checking...";
-    const ipData = await getPublicIp();
-    el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
-    el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
-    el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
-    el("region").textContent = ipData.ok ? ipData.region : "Unavailable";
-    el("city").textContent = ipData.ok ? ipData.city : "Unavailable";
-  })();
 })();
 </script>
 </body>
