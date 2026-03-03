@@ -62,6 +62,8 @@
   <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
+  <div id="message">
+  </div>
 <script>
 (() => {
   const TIMEOUT_MS = 4000;
@@ -142,6 +144,7 @@
 
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
+    el("message").textContent = allOk ? "" : "Please pass this information on to IT"
 
     el("runBtn").disabled = false;
   }
