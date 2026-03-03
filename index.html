@@ -113,7 +113,7 @@
     const ipRes = await withTimeout((signal) => fetch("https://api.ipify.org?format=json", { signal, cache: "no-store" }));
     if (!ipRes.ok) return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: ""};
     try {
-      const ip = await ipRes.json();
+      const ip = await ipRes.res.json();
       const ipRes = await withTimeout((signal) => fetch(`https://ipapi.co/${ip}/json`, { signal, cache: "no-store" }));
       if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", region: ""};
       const data = await ispRes.json();
