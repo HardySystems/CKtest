@@ -135,6 +135,7 @@
     el("region").textContent = "Checking...";
     el("city").textContent = "Checking...";
     const ipData = await getPublicIp();
+    console.log(ipData);
     el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
     el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
     el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
