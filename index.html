@@ -110,10 +110,13 @@
   async function getPublicIp() {
     // Not “seen by YOUR web server” (static sites can’t see headers), but a reliable external view of public IP.
     // If you later add a tiny backend, swap this to your endpoint and return the connecting IP.
-    const ipRes = await withTimeout((signal) => fetch("https://ipwho.is", { signal, cache: "no-store" }));
+    const ipRes = await withTimeout((signal) => fetch("https://api.ipify.org?format=json", { signal, cache: "no-store" }));
     if (!ipRes.ok) return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: ""};
     try {
-      const data = await ipRes.res.json();
+      const {ip} = await ipRes.res.json();
+      const ispRes = await withTimeout((signal) => fetch(`https://api.ipapi.is/?=${ip}`, { signal, cache: "no-store" }));
+      if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", region: ""};
+      const data = await ispRes.res.json();
       return { ok: false, ip: data.ip || "", isp: data.connection.org || "", asn: data.connection.asn || "", city: data.city || "", region: data.region || ""};
     } catch {
       return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: "" };
@@ -123,6 +126,7 @@
   async function run() {
     el("runBtn").disabled = true;
     el("ts").textContent = new Date().toString();
+
 
     // Public IP
     el("publicIp").textContent = "Checking…";
