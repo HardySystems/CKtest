@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ContentKeeper Quick Check</title>
+  <title>Student Internet Filter Connection Check</title>
   <style>
     :root { --ok:#1a7f37; --bad:#b42318; --muted:#667085; }
     body { font-family: system-ui, Segoe UI, Arial, sans-serif; margin: 20px; color:#111827; }
@@ -24,7 +24,7 @@
   </style>
 </head>
 <body><div style="display:flex; justify-content: space-around; flex-direction: column; text-align: center;">
-  <h1 style="font-size: 24px">ContentKeeper Quick Check</h1>
+  <h1 style="font-size: 26px">ContentKeeper Quick Check</h1>
   <div class="muted" style="margin-top:20px">
     Test to see if your internet connection is impacted by the routing issues we're experiencing with ContentKeeper (CKExpress)
   </div>
@@ -129,7 +129,6 @@
     el("isp").textContent = "Checking...";
     el("asn").textContent = "Checking...";
     const ipData = await getPublicIp();
-    console.log(ipData);
     el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
     el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
     el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
