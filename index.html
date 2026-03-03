@@ -111,16 +111,16 @@
     // Not “seen by YOUR web server” (static sites can’t see headers), but a reliable external view of public IP.
     // If you later add a tiny backend, swap this to your endpoint and return the connecting IP.
     const ipRes = await withTimeout((signal) => fetch("https://api.ipify.org?format=json", { signal, cache: "no-store" }));
-    if (!ipRes.ok) return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: ""};
+    if (!ipRes.ok) return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", state: ""};
     try {
       const {ip} = await ipRes.res.json();
       const ispRes = await withTimeout((signal) => fetch(`https://api.ipapi.is/?=${ip}`, { signal, cache: "no-store" }));
-      if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", region: "-"};
+      if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", state: "-"};
       const data = await ispRes.res.json();
       console.log("Data: ", data);
-      return { ok: true, ip: data.ip, isp: data.company.name, asn: data.asn.asn, city: data.city, region: data.region};
+      return { ok: true, ip: data.ip, isp: data.company.name, asn: data.asn.asn, city: data.location.city, state: data.location.state};
     } catch {
-      return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: "" };
+      return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", state: "" };
     }
   }
 
