@@ -114,7 +114,7 @@
     if (!ipRes.ok) return { ok: false, ip: "-", isp: "-", asn: "-", city: "-", region: ""};
     try {
       const {ip} = await ipRes.res.json();
-      const ipRes = await withTimeout((signal) => fetch(`https://ipapi.co/${ip}/json`, { signal, cache: "no-store" }));
+      const ispRes = await withTimeout((signal) => fetch(`https://ipapi.co/${ip}/json`, { signal, cache: "no-store" }));
       if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-", city: "-", region: ""};
       const data = await ispRes.res.json();
       return { ok: false, ip: data.ip || "", isp: data.org || "", asn: data.asn || "", city: data.city || "", region: data.region || ""};
