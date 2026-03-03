@@ -58,12 +58,12 @@
           <td class="mono" id="asn">-</td>
         </tr>
         <tr>
-          <th>Region</th>
-          <td class="mono" id="region">-</td>
-        </tr>
-        <tr>
           <th>City</th>
           <td class="mono" id="city">-</td>
+        </tr>
+        <tr>
+          <th>State</th>
+          <td class="mono" id="state">-</td>
         </tr>
       </tbody>
     </table>
@@ -133,14 +133,14 @@
     el("publicIp").textContent = "Checking…";
     el("isp").textContent = "Checking...";
     el("asn").textContent = "Checking...";
-    el("region").textContent = "Checking...";
+    el("state").textContent = "Checking...";
     el("city").textContent = "Checking...";
     const ipData = await getPublicIp();
     console.log(ipData);
     el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
     el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
     el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
-    el("region").textContent = ipData.ok ? ipData.region : "Unavailable";
+    el("state").textContent = ipData.ok ? ipData.state : "Unavailable";
     el("city").textContent = ipData.ok ? ipData.city : "Unavailable";
 
 
