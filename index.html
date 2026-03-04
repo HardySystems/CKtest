@@ -23,7 +23,7 @@
     .small { font-size: 12px; }
   </style>
 </head>
-<body onload="FreshworksWidget('hide', 'launcher');"><div style="display:flex; justify-content: space-around; flex-direction: column; text-align: center;">
+<body><div style="display:flex; justify-content: space-around; flex-direction: column; text-align: center;">
   <h1 style="font-size: 26px">Student Internet Filter Connection Check</h1>
   <div class="muted" style="margin-top:20px">
     Test to see if your internet connection is impacted by the routing issues we're experiencing with ContentKeeper (CKExpress)
@@ -78,7 +78,8 @@
 
   const targets = [
     "https://chub1.imp.us.contentkeeper.net/",
-    "https://chub2.imp.us.contentkeeper.net/"
+    "https://chub2.imp.us.contentkeeper.net/",
+    "https://chub3.imp.us.contentkeeper.net/"
   ];
 
   const el = (id) => document.getElementById(id);
@@ -137,6 +138,7 @@
 
   async function run() {
     el("runBtn").disabled = true;
+    el("runBtn").disabled = true;
     el("ts").textContent = new Date().toString();
     setBadge(el("overall"), true, "-");
 
@@ -164,7 +166,7 @@
     el("runBtn").disabled = false;
   }
 
-  el("reportBtn").addEventListener("click", reportProblem());
+  el("reportBtn").addEventListener("click", reportProblem);
   el("runBtn").addEventListener("click", run);
   el("reportBtn").disabled = true;
 })();
