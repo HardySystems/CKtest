@@ -170,7 +170,7 @@
 
   el("runBtn").addEventListener("click", run);
   el("reportBtn").addEventListener("click", () => {
-    reportProblem("ip", "asn");
+    reportProblem(el("publicIP").textContent, el("asn").textContent);
   });
   el("reportBtn").disabled = true;
 })();
