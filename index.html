@@ -94,12 +94,12 @@
   function reportProblem() {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Issue - IP Address: ${el("publicIP").textContent}, ASN: ${el("asn").textContent}}`,
+        description: 'Reporting Student Web Filter Issue - IP Address:',
         priority: 1,
         status: 2
       });
       FreshworksWidget('open', 'ticketForm');
-    }
+  }
 
   async function withTimeout(promiseFactory) {
     const ctrl = new AbortController();
