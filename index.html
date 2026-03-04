@@ -84,6 +84,9 @@
     "https://chub3.imp.us.contentkeeper.net/"
   ];
 
+  var globalip = "";
+  var globalasn = "";
+
   const el = (id) => document.getElementById(id);
 
   function setBadge(node, ok, text) {
@@ -133,6 +136,8 @@
       const ispRes = await withTimeout((signal) => fetch(`https://api.ipapi.is/?=${ip}`, { signal, cache: "no-store" }));
       if (!ispRes.ok) return { ok: false, ip: ip, isp: "-", asn: "-" };
       const data = await ispRes.res.json();
+      globalip = ip;
+      globalasn = data.asn.asn;
       return { ok: true, ip: data.ip, isp: data.asn.descr, asn: data.asn.asn };
     } catch {
       return { ok: false, ip: "-", isp: "-", asn: "-" };
@@ -170,7 +175,7 @@
 
   el("runBtn").addEventListener("click", run);
   el("reportBtn").addEventListener("click", () => {
-    reportProblem(el("publicIP").textContent, el("asn").textContent);
+    reportProblem(globalip, globalasn);
   });
   el("reportBtn").disabled = true;
 })();
