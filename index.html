@@ -36,6 +36,10 @@
           <li>Click on 'Run check' and wait for the PASS or FAIL result</li>
           <li>If result is 'FAIL' please click 'Report to IT'</li>
         </ol>
+        <label>
+          I acknowledge and consent to this utility collecting publicly available information relating to my internet connection, and I understand that this information will be obtained and used by the GSLC IT Department to resolve the issue.
+          <input type="checkbox" id="termsChkbx" />
+        </label>
       </div>
     </div>
   </div>
@@ -107,7 +111,7 @@
   function reportProblem(ip, asn) {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Connection Check Issue - IP Address: ${ip}, ASN: ${asn}`,
+        description: `Reporting Student Web Filter Connection Check Issue\n\nIP Address: ${ip}\nASN: ${asn}`,
         priority: 1,
         status: 2
       });
