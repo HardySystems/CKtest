@@ -91,10 +91,10 @@
     node.textContent = text;
   }
 
-  function reportProblem(ip = "123.546.875.54") {
+  function reportProblem() {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Issue - IP Address:${ip}`,
+        description: `Reporting Student Web Filter Issue - IP Address: ${el("publicIP").textContent}`,
         priority: 1,
         status: 2
       });
