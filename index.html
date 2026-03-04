@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Student Internet Filter Connection Check</title>
+  <title>Student Web Filter Connection Check</title>
   <style>
     :root { --ok:#1a7f37; --bad:#b42318; --muted:#667085; }
     body { font-family: system-ui, Segoe UI, Arial, sans-serif; margin: 20px; color:#111827; }
@@ -24,9 +24,9 @@
   </style>
 </head>
 <body><div style="display:flex; justify-content: space-around; flex-direction: column; text-align: center;">
-  <h1 style="font-size: 26px">Student Internet Filter Connection Check</h1>
+  <h1 style="font-size: 26px">Student Web Filter Connection Check</h1>
   <div class="muted" style="margin-top:20px">
-    Test to see if your internet connection is impacted by the routing issues we're experiencing with ContentKeeper (CKExpress)
+    Test to see if your internet connection is impacted by the routing issues we're experiencing with our Student Web Filter
   </div>
 
   <div class="row" style="margin:20px 0; display: flex; justify-content: center;">
@@ -80,8 +80,7 @@
 
   const targets = [
     "https://chub1.imp.us.contentkeeper.net/",
-    "https://chub2.imp.us.contentkeeper.net/",
-    "https://chub3.imp.us.contentkeeper.net/"
+    "https://chub2.imp.us.contentkeeper.net/"
   ];
 
   var globalip = "";
@@ -97,7 +96,7 @@
   function reportProblem(ip, asn) {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Issue - IP Address: ${ip}, ASN: ${asn}`,
+        description: `Reporting Student Web Filter Connection Check Issue - IP Address: ${ip}, ASN: ${asn}`,
         priority: 1,
         status: 2
       });
