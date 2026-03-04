@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" style="max-width:max-content; margin:10px auto">
+<html lang="en" style="max-width:max-content">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,6 +7,9 @@
   <title>Student Web Filter Connection Check</title>
   <style>
     :root { --ok:#1a7f37; --bad:#b42318; --muted:#667085; }
+    @media screen and (min-width:600px) {
+      body {width: 75%}
+    }
     body { font-family: system-ui, Segoe UI, Arial, sans-serif; margin: 20px; color:#111827; }
     h1 { font-size: 20px; margin: 0 0 6px; }
     .muted { color: var(--muted); font-size: 13px; }
@@ -35,6 +38,8 @@
           <li>Click on 'Run check' and wait for the PASS or FAIL result</li>
           <li>If result is 'FAIL' please click 'Report to IT'</li>
         </ol>
+      </div>
+      <div>
         <label style="text-align: center;">
           <input type="checkbox" id="termsChkbx" />
           I acknowledge and consent to this utility collecting publicly available information relating to my internet connection, and I understand that this information will be obtained and used by the GSLC IT Department to resolve the issue.
@@ -159,7 +164,7 @@
     setBadge(el("overall"), true, "Checking...");
 
     // Public IP
-    el("publicIp").textContent = "Checking…";
+    el("publicIp").textContent = "Checking...";
     el("isp").textContent = "Checking...";
     el("asn").textContent = "Checking...";
     const ipData = await getPublicIp();
