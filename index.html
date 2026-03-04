@@ -62,22 +62,14 @@
   <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
-  <div style="margin:10px; display:none" id="report">
-    <button onclick="reportProblem()" type="button">Report to IT</button>
+  <div style="margin:10px">
+    <button type="button" id="reportBtn">Report to IT</button>
   </div>
   <script>
     window.fwSettings={
       'widget_id':43000001083
     };
     !function(){if("function"!=typeof window.FreshworksWidget){var n=function(){n.q.push(arguments)};n.q=[],window.FreshworksWidget=n}}() 
-    function reportProblem() {
-      FreshworksWidget('prefill', 'ticketForm', {
-        subject: 'Web Filter Issue',
-        description: 'I have the Student Web Filter Issue',
-        priority: 1,
-        status: 2
-      })
-    }
   </script>
   <script type='text/javascript' src='https://widget.freshworks.com/widgets/43000001083.js' async defer></script>
 <script>
@@ -95,6 +87,15 @@
     node.className = "badge " + (ok ? "ok" : "bad");
     node.textContent = text;
   }
+
+  function reportProblem() {
+      FreshworksWidget('prefill', 'ticketForm', {
+        subject: 'Web Filter Issue',
+        description: 'I have the Student Web Filter Issue',
+        priority: 1,
+        status: 2
+      })
+    }
 
   async function withTimeout(promiseFactory) {
     const ctrl = new AbortController();
@@ -158,12 +159,14 @@
 
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
-    el("report").style.display = allOk ? "none" : "block"
+    el("reportBtn").disabled = allOk ? true : false;
 
     el("runBtn").disabled = false;
   }
 
+  el("reportBtn").addEventListener("click", reportProblem());
   el("runBtn").addEventListener("click", run);
+  el("reportBtn").disabled = true;
 })();
 </script>
 </div>
