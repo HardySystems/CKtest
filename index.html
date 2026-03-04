@@ -92,9 +92,11 @@
   }
 
   function reportProblem() {
+    const ip = el("publicIP").textContent;
+    console.log(ip);
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Issue - IP Address: ${el("publicIP").textContent}`,
+        description: `Reporting Student Web Filter Issue - IP Address: ${ip}`,
         priority: 1,
         status: 2
       });
@@ -153,7 +155,6 @@
     el("publicIp").textContent = ipData.ok ? ipData.ip : "Unavailable";
     el("isp").textContent = ipData.ok ? ipData.isp : "Unavailable";
     el("asn").textContent = ipData.ok ? ipData.asn : "Unavailable";
-
 
     // Endpoint checks
     const results = [];
