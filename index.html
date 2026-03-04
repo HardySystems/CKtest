@@ -91,10 +91,10 @@
     node.textContent = text;
   }
 
-  function reportProblem(ip, asn) {
+  function reportProblem() {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Issue - IP Address: ${ip}, ASN: ${asn}`,
+        description: `Reporting Student Web Filter Issue - IP Address: ${el("publicIP").textContent}, ASN: ${el("asn").textContent}}`,
         priority: 1,
         status: 2
       });
@@ -170,7 +170,7 @@
   }
 
   el("runBtn").addEventListener("click", run);
-  el("reportBtn").addEventListener("click", reportProblem(el("publicIP").textContent, el("asn").textContent));
+  el("reportBtn").addEventListener("click", reportProblem);
   el("reportBtn").disabled = true;
 })();
 </script>
