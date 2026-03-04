@@ -62,7 +62,14 @@
   <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
-  <div style="margin:10px" id="message">
+  <div style="margin:10px; display:none" id="ticketForm">
+    <script>
+	    window.fwSettings={
+	      'widget_id':43000001083
+	    };
+	    !function(){if("function"!=typeof window.FreshworksWidget){var n=function(){n.q.push(arguments)};n.q=[],window.FreshworksWidget=n}}() 
+    </script>
+    <script type='text/javascript' src='https://widget.freshworks.com/widgets/43000001083.js' async defer></script>
   </div>
 <script>
 (() => {
@@ -121,7 +128,6 @@
   async function run() {
     el("runBtn").disabled = true;
     el("ts").textContent = new Date().toString();
-    el("message").textContent = "";
     setBadge(el("overall"), true, "-");
 
     // Public IP
@@ -143,7 +149,7 @@
 
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
-    el("message").textContent = allOk ? "" : "Please pass this information on to IT"
+    el("ticketForm").style.display = allOk ? "none" : "block";
 
     el("runBtn").disabled = false;
   }
