@@ -62,7 +62,10 @@
   <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
-  <div style="margin:20px" id="message">
+  <div style="margin:20px">
+    <button style="font-size: 18px" id="reportBtn">
+      Report to IT
+    </button>
   </div>
   <script>
     window.fwSettings={
@@ -88,13 +91,14 @@
     node.textContent = text;
   }
 
-  function reportProblem() {
+  function reportProblem(ip, asn) {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: 'I have the Student Web Filter Issue',
+        description: `Reporting Student Web Filter Issue - IP Address: ${ip}, ASN: ${asn}`,
         priority: 1,
         status: 2
-      })
+      });
+      FreshworksWidget('open', 'ticketForm');
     }
 
   async function withTimeout(promiseFactory) {
@@ -137,8 +141,8 @@
 
   async function run() {
     el("runBtn").disabled = true;
+    el("reportBtn").disabled = true;
     el("ts").textContent = new Date().toString();
-    el("message").textContent = ""
     setBadge(el("overall"), true, "Checking...");
 
     // Public IP
@@ -160,12 +164,14 @@
 
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
-    el("message").textContent = allOk ? "" : "Please click on Help below to report to IT";
-
+    
+    el("reportBtn").disabled = allOk ? true : false;
     el("runBtn").disabled = false;
   }
 
   el("runBtn").addEventListener("click", run);
+  el("reportBtn").addEventListener("click", reportProblem(el("publicIP").textContent, el("asn").textContent));
+  el("reportBtn").disabled = true;
 })();
 </script>
 </div>
