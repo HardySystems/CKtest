@@ -23,7 +23,7 @@
     .small { font-size: 12px; }
   </style>
 </head>
-<body><div style="display:flex; justify-content: space-around; flex-direction: column; text-align: center;">
+<body onload="FreshworksWidget('hide', 'launcher');"><div style="display:flex; justify-content: space-around; flex-direction: column; text-align: center;">
   <h1 style="font-size: 26px">Student Internet Filter Connection Check</h1>
   <div class="muted" style="margin-top:20px">
     Test to see if your internet connection is impacted by the routing issues we're experiencing with ContentKeeper (CKExpress)
@@ -62,15 +62,16 @@
   <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
-  <div style="margin:10px; display:none" id="ticketForm">
-    <script>
-	    window.fwSettings={
-	      'widget_id':43000001083
-	    };
-	    !function(){if("function"!=typeof window.FreshworksWidget){var n=function(){n.q.push(arguments)};n.q=[],window.FreshworksWidget=n}}() 
-    </script>
-    <script type='text/javascript' src='https://widget.freshworks.com/widgets/43000001083.js' async defer></script>
+  <div style="margin:10px">
+    <button type="button" id="reportBtn">Report to IT</button>
   </div>
+  <script>
+    window.fwSettings={
+      'widget_id':43000001083
+    };
+    !function(){if("function"!=typeof window.FreshworksWidget){var n=function(){n.q.push(arguments)};n.q=[],window.FreshworksWidget=n}}() 
+  </script>
+  <script type='text/javascript' src='https://widget.freshworks.com/widgets/43000001083.js' async defer></script>
 <script>
 (() => {
   const TIMEOUT_MS = 4000;
@@ -86,6 +87,15 @@
     node.className = "badge " + (ok ? "ok" : "bad");
     node.textContent = text;
   }
+
+  function reportProblem() {
+      FreshworksWidget('prefill', 'ticketForm', {
+        subject: 'Web Filter Issue',
+        description: 'I have the Student Web Filter Issue',
+        priority: 1,
+        status: 2
+      })
+    }
 
   async function withTimeout(promiseFactory) {
     const ctrl = new AbortController();
@@ -149,12 +159,14 @@
 
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
-    el("ticketForm").style.display = allOk ? "none" : "block";
+    el("reportBtn").disabled = allOk ? true : false;
 
     el("runBtn").disabled = false;
   }
 
+  el("reportBtn").addEventListener("click", reportProblem());
   el("runBtn").addEventListener("click", run);
+  el("reportBtn").disabled = true;
 })();
 </script>
 </div>
