@@ -62,8 +62,7 @@
   <div style="display:flex; text-align: center; margin-top:20px; justify-content: space-around; font-size: 24px;">
     <div id="overall" class="badge bad">Not run</div>
   </div>
-  <div style="margin:10px">
-    <button type="button" id="reportBtn">Report to IT</button>
+  <div style="margin:20px" id="message">
   </div>
   <script>
     window.fwSettings={
@@ -138,9 +137,9 @@
 
   async function run() {
     el("runBtn").disabled = true;
-    el("runBtn").disabled = true;
     el("ts").textContent = new Date().toString();
-    setBadge(el("overall"), true, "-");
+    el("message").textContent = ""
+    setBadge(el("overall"), true, "Checking...");
 
     // Public IP
     el("publicIp").textContent = "Checking…";
@@ -161,14 +160,12 @@
 
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
-    el("reportBtn").disabled = allOk ? true : false;
+    el("message").textContent = allOk ? "" : "Please click on Help below to report to IT";
 
     el("runBtn").disabled = false;
   }
 
-  el("reportBtn").addEventListener("click", reportProblem);
   el("runBtn").addEventListener("click", run);
-  el("reportBtn").disabled = true;
 })();
 </script>
 </div>
