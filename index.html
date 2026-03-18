@@ -100,6 +100,7 @@
 
   var globalip = "";
   var globalasn = "";
+  var globalresult = "";
 
   const el = (id) => document.getElementById(id);
 
@@ -108,10 +109,10 @@
     node.textContent = text;
   }
 
-  function reportProblem(ip, asn) {
+  function reportProblem(ip, asn, result) {
       FreshworksWidget('prefill', 'ticketForm', {
         subject: 'Web Filter Issue',
-        description: `Reporting Student Web Filter Connection Check Issue\n\nIP Address: ${ip}\nASN: ${asn}`,
+        description: `Reporting Student Web Filter Connection Check Issue\n\nTest Result: ${result}\nIP Address: ${ip}\nASN: ${asn}`,
         priority: 1,
         status: 2
       });
@@ -180,6 +181,7 @@
     }
 
     const allOk = results.every(r => r.ok);
+    globalresult = allOK ? "PASS" : "FAIL";
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
     
     el("reportBtn").disabled = false;
@@ -194,7 +196,7 @@
   el("runBtn").addEventListener("click", run);
   el("termsChkbx").addEventListener("change", updateButtonState);
   el("reportBtn").addEventListener("click", () => {
-    reportProblem(globalip, globalasn);
+    reportProblem(globalip, globalasn, globalresult);
   });
   el("reportBtn").disabled = true;
 })();
