@@ -36,7 +36,7 @@
         <ol>
           <li>Please make sure this device is connected to your home Wifi</li>
           <li>Click on 'Run check' and wait for the PASS or FAIL result</li>
-          <li>If result is 'FAIL' please click 'Report to IT'</li>
+          <li>If the result is 'FAIL' or IT has requested this information please click 'Report to IT'</li>
         </ol>
       </div>
       <div>
@@ -182,7 +182,7 @@
     const allOk = results.every(r => r.ok);
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
     
-    el("reportBtn").disabled = allOk ? true : false;
+    el("reportBtn").disabled = false;
     el("runBtn").disabled = false;
   }
 
