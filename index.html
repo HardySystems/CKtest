@@ -181,7 +181,7 @@
     }
 
     const allOk = results.every(r => r.ok);
-    globalresult = allOK ? "PASS" : "FAIL";
+    globalresult = allOk ? "PASS" : "FAIL";
     setBadge(el("overall"), allOk, allOk ? "PASS" : "FAIL");
     
     el("reportBtn").disabled = false;
